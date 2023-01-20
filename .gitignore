@@ -1,0 +1,9 @@
+*.code-workspace
+.vscode
+.idea
+
+.terraform*
+terraform.tfstate*
+
+vendor
+bin
