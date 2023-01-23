@@ -123,6 +123,11 @@ func resourceServer() *schema.Resource {
 				ForceNew: false,
 				Optional: true,
 			},
+			"user_data_base64": {
+				Type:     schema.TypeString,
+				ForceNew: false,
+				Optional: true,
+			},
 			"primary_ipv4": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -163,6 +168,10 @@ func resourceServerCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		PackageBillingContractId: d.Get("package_billing_contract_id").(string),
 		CloudConfig:              base64.StdEncoding.EncodeToString([]byte(d.Get("cloud_config").(string))),
 		ScriptContent:            base64.StdEncoding.EncodeToString([]byte(d.Get("user_data").(string))),
+	}
+
+	if userData64, ok := d.GetOk("user_data_base64"); ok {
+		req.ScriptContent = userData64.(string)
 	}
 
 	s, err := c.CreateServer(req)
@@ -297,6 +306,10 @@ func resourceServerUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 			Password:      d.Get("password").(string),
 			CloudConfig:   d.Get("cloud_config").(string),
 			ScriptContent: base64.StdEncoding.EncodeToString([]byte(d.Get("user_data").(string))),
+		}
+
+		if userData64, ok := d.GetOk("user_data_base64"); ok {
+			req.ScriptContent = userData64.(string)
 		}
 
 		// build name, id, locationId, osId
