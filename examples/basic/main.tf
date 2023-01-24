@@ -8,11 +8,11 @@ resource "netactuate_sshkey" "sshkey" {
 }
 
 resource "netactuate_server" "server" {
-  hostname                    = "terraform.example.com"
-  plan                        = "VR1x1x25"
-  location                    = "SJC - San Jose, CA" // 3
-  image_id                    = 5726                 // Ubuntu 20.04.3 LTS x64
-  ssh_key_id                  = netactuate_sshkey.sshkey.id
+  hostname    = "terraform.example.com"
+  plan        = "VR1x1x25"
+  location    = "SJC - San Jose, CA" // 3
+  image_id    = 5726                 // Ubuntu 20.04.3 LTS x64
+  ssh_key_id  = netactuate_sshkey.sshkey.id
 }
 
 //  Other Variables you can use inside the netactuate_server resource block:
