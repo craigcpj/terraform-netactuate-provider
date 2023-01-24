@@ -6,7 +6,7 @@ Currently in this stage of development you'll need both gona-dev and terraform-n
 the go.mod replace expects gona to be ../ from terraform-netactuate-provider.
 
 Basic Steps to test:
-
+```
 git clone gona-dev
 git clone terraform-netactuate-provider
 
@@ -19,7 +19,7 @@ edit main.tf
 terraform init
 terraform plan
 terraform apply
-
+```
 
 ### Authentication
 There are the following ways of providing credentials for authentication:
