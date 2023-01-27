@@ -18,7 +18,7 @@ import (
 
 const (
 	tries       = 60
-	intervalSec = 10
+	intervalSec = 15
 )
 
 var (
@@ -350,7 +350,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, m interfa
 func wait4Status(serverId int, status string, client *gona.Client) (server gona.Server, d diag.Diagnostics) {
 	for i := 0; i < tries; i++ {
 		server, err := client.GetServer(serverId)
-		if err != nil && i >= 5 {
+		if err != nil && i >= 10 {
 			// Retry errors on first few attempts, since sometimes calling GetServer
 			// immediately after creating a server returns an error
 			// ("mbpkgid must be a valid mbpkgid").
