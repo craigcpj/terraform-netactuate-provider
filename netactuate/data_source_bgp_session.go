@@ -2,6 +2,7 @@ package netactuate
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -109,10 +110,10 @@ func dataSourceBGPSessionsRead(ctx context.Context, d *schema.ResourceData, m in
 		s := make(map[string]interface{})
 
 		s["id"] = session.ID
-//		s["mb_id"] = session.MbID
+		// s["mb_id"] = session.MbID
 		s["description"] = session.Description
 		s["routes_received"] = session.RoutesReceived
-		s["config_status"] = session.ConfigStatus
+		s["config_status"] = fmt.Sprint(session.ConfigStatus)
 		s["last_update"] = session.LastUpdate
 		s["locked"] = session.IsLocked()
 		s["group_id"] = session.GroupID

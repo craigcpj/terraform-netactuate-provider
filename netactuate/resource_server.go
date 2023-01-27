@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -349,7 +350,7 @@ func resourceServerDelete(ctx context.Context, d *schema.ResourceData, m interfa
 func wait4Status(serverId int, status string, client *gona.Client) (server gona.Server, d diag.Diagnostics) {
 	for i := 0; i < tries; i++ {
 		server, err := client.GetServer(serverId)
-		if err != nil && i >= 3 {
+		if err != nil && i >= 5 {
 			// Retry errors on first few attempts, since sometimes calling GetServer
 			// immediately after creating a server returns an error
 			// ("mbpkgid must be a valid mbpkgid").
@@ -367,17 +368,10 @@ func wait4Status(serverId int, status string, client *gona.Client) (server gona.
 
 func getParams(d *schema.ResourceData, client *gona.Client) (int, int, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	locationId, exists := d.GetOk("location_id")
-	if !exists {
-		location, d := getLocationByName(d.Get("location").(string), client)
-		if d != nil {
-			diags = append(diags, *d)
-		} else {
-			locationId = location.ID
-		}
+	locationId, ld := getLocation(d, client)
+	if ld != nil {
+		diags = append(diags, *ld)
 	}
-
 	imageId, exists := d.GetOk("image_id")
 	if !exists {
 		image, d := getImageByName(d.Get("image").(string), client)
@@ -388,22 +382,35 @@ func getParams(d *schema.ResourceData, client *gona.Client) (int, int, diag.Diag
 		}
 	}
 
-	return locationId.(int), imageId.(int), diags
+	return locationId, imageId.(int), diags
 }
 
-func getLocationByName(name string, client *gona.Client) (*gona.Location, *diag.Diagnostic) {
+func getLocation(d *schema.ResourceData, client *gona.Client) (int, *diag.Diagnostic) {
+	locationId, exists := d.GetOk("location_id")
+	if exists {
+		return locationId.(int), nil
+	}
+
+	requestLocation := d.Get("location").(string)
+	if requestLocation == "" {
+		return 0, &diag.Errorf("Please provide a location or location_id")[0]
+	}
+
 	locations, err := client.GetLocations()
 	if err != nil {
-		return nil, &diag.FromErr(err)[0]
+		return 0, &diag.FromErr(err)[0]
 	}
 
 	for _, location := range locations {
-		if location.Name == name {
-			return &location, nil
+		if location.Name == requestLocation {
+			return location.ID, nil
+		}
+		if strings.EqualFold(strings.Fields(location.Name)[0], strings.Fields(requestLocation)[0]) {
+			return location.ID, nil
 		}
 	}
 
-	return nil, &diag.Errorf("Provided location %q doesn't exist", name)[0]
+	return 0, &diag.Errorf("Provided location %q doesn't exist")[0]
 }
 
 func getImageByName(name string, client *gona.Client) (*gona.OS, *diag.Diagnostic) {

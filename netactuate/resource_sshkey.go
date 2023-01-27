@@ -83,6 +83,10 @@ func resourceSshKeyDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
+	if id == 0 {
+		return nil
+	}
+
 	err = c.DeleteSSHKey(id)
 	if err != nil {
 		return diag.FromErr(err)
